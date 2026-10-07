@@ -6,7 +6,7 @@ An end-to-end business intelligence project that turns a messy, flat vehicle-sal
 > **Tools:** Power BI Desktop, Power Query (M), DAX
 > **Article:** [Dev.to write-up](ADD-LINK-HERE)
 
-![Executive Dashboard](screenshots/01_executive_dashboard.png)
+![Executive Dashboard](screenshots/executive_dashboard.png)
 
 ---
 
@@ -22,12 +22,9 @@ An end-to-end business intelligence project that turns a messy, flat vehicle-sal
 8. [Business definitions and assumptions](#8-business-definitions-and-assumptions)
 9. [DAX measures](#9-dax-measures)
 10. [Report design](#10-report-design)
-11. [Key findings](#11-key-findings)
-12. [Recommendations](#12-recommendations)
-13. [Challenges and lessons learned](#13-challenges-and-lessons-learned)
-14. [How to reproduce](#14-how-to-reproduce)
-15. [Limitations and next steps](#15-limitations-and-next-steps)
-16. [Author](#16-author)
+11. [Challenges and lessons learned](#11-challenges-and-lessons-learned)
+12. [Limitations and next steps](#12-limitations-and-next-steps)
+13. [Author](#13-author)
 
 ---
 
@@ -50,9 +47,9 @@ The raw data was not ready for this. It mixed currencies, inconsistent category 
 | Source file | `Jcars_data.csv` |
 | Grain | One row per sales order (`Order ID`) |
 | Columns | 32 (order, customer, geography, branch, rep, vehicle, pricing, cost, payment, delivery, rating, return and recorded revenue fields) |
-| Raw rows | `[ADD]` |
-| Rows after de-duplication | `[ADD]` |
-| Date range | `[ADD earliest]` to `[ADD latest]` |
+| Raw rows | 277 |
+| Rows after de-duplication | 254 |
+| Date range | 7/1/2025 to 6/30/2026 |
 
 All 32 columns are loaded as text and parsed deliberately, so no value is lost to an automatic type guess.
 
@@ -85,7 +82,6 @@ All 32 columns are loaded as text and parsed deliberately, so no value is lost t
     └── power_query_steps.png
 ```
 
-No credentials, file-system secrets or personal identifiers are included. `[Confirm customer names are anonymised or already synthetic before publishing.]`
 
 ## 4. Approach
 
@@ -100,7 +96,7 @@ The project followed a deliberate sequence rather than going straight to charts:
 7. **Design the report** as one analytical flow: dashboard, detail, investigation, insight, decision.
 8. **Document** insights, recommendations, assumptions and lessons learned.
 
-### Power Query design
+### . Power Query design
 
 The cleaning logic lives in four queries (`powerquery/Jcars_Clean.pq`):
 
@@ -147,9 +143,9 @@ All monetary values are expressed in **KES**. Values with no stated currency are
 | EUR | 151.00 |
 | ZAR | 7.91 |
 
-**Source and date:** `[ADD source, for example Central Bank of Kenya, and the rate date]`
+**Source and date:** [CBK Exchange Rates](https://www.centralbank.go.ke/category/exchange-rates/)
 
-One fixed rate set is used for all rows so that results are consistent and reproducible. The trade-off is that it ignores historical exchange-rate movement. Currencies that cannot be identified are not converted and are flagged for review. Details are in [`docs/fx_rates.md`](docs/fx_rates.md).
+One fixed rate set is used for all rows so that results are consistent and reproducible. The trade-off is that it ignores historical exchange-rate movement. Currencies that cannot be identified are not converted and are flagged for review.
 
 ## 7. Data model
 
@@ -203,11 +199,10 @@ Full rules are in [`docs/assumptions_and_rules.md`](docs/assumptions_and_rules.m
 - A missing discount is treated as 0 only inside the calculated revenue.
 - `Mt Kenya` is mapped to Central. `Held` and `Late` are treated as Delayed.
 - Valid ages are 18–100, valid ratings 1–5, valid vehicle years 1980 to next year.
-- `[ADD any assumption you made about whether recorded revenue includes the delivery fee, based on Revenue Check results]`
 
 ## 9. DAX measures
 
-The full set is in [`dax/Jcars_DAX.dax`](dax/Jcars_DAX.dax). Measures sit in a dedicated `_Measures` table.
+Measures sit in a dedicated `_Measures` table.
 
 | Group | Examples |
 |---|---|
@@ -245,7 +240,7 @@ Screenshots of each page are in [`screenshots/`](screenshots/).
 
 
 
-## 13. Challenges and lessons learned
+## 11. Challenges and lessons learned
 
 - **Substring replacement is dangerous.** Replacing `Gre` with `Grey` turned `Green` into `Greyen`. Exact-match mapping tables fixed this and are easier to audit.
 - **Currency parsing must match currency detection.** Some currencies were detected but their symbols were never stripped, silently turning values into nulls. One parser used for all five money columns removed the inconsistency.
@@ -253,17 +248,9 @@ Screenshots of each page are in [`screenshots/`](screenshots/).
 - **Measures belong in the fact table.** A measure over a column in a dimension ignores slicers on other dimensions.
 - **Flag unusual data, don't delete it.** Keeping flagged rows and auditing duplicates made every cleaning decision explainable.
 
-## 14. How to reproduce
 
-1. Clone the repository.
-2. Open `JCars_Logistics.pbix` in Power BI Desktop.
-3. In **Transform data**, update the `FilePath` parameter in `Jcars_Staged` to the location of `data/Jcars_data.csv`.
-4. Review the FX rates in the `FX` record at the top of `Jcars_Staged` if you want to use different rates.
-5. Refresh. Then check `Audit_RowCounts` to confirm the row counts and totals.
 
-To rebuild from scratch, paste the queries from `powerquery/Jcars_Clean.pq` into four blank queries, then add the calculated columns and measures from `dax/Jcars_DAX.dax`.
-
-## 15. Limitations and next steps
+## 12. Limitations and next steps
 
 - Exchange rates are fixed and not date-specific.
 - Duplicates are resolved by keeping the first occurrence. Conflicting duplicates should be reviewed against the audit query.
@@ -273,12 +260,11 @@ To rebuild from scratch, paste the queries from `powerquery/Jcars_Clean.pq` into
 - No targets or budgets exist in the dataset, so performance is compared against prior periods, averages and data-driven thresholds rather than goals.
 - Possible extensions: date-specific exchange rates, a customer ID in the source system, and forecasting.
 
-## 16. Author
+## 13. Author
 
 **`[Your name]`**
 LuxDev HQ Data Engineering bootcamp
-`[LinkedIn]` · `[GitHub]` · `[Dev.to article]`
+`[LinkedIn](https://www.linkedin.com/in/emmanuel-kipkoech-0149b4241/)` · [GitHub](https://github.com/Manu-Data1) · [Dev.to Article](https://dev.to/manu_kipkoech/from-messy-csv-to-management-dashboard-a-power-bi-case-study-31ki-temp-slug-8048726?preview=71f312b99bc67425f347383f7958cfa519c86e9586d30272454786bfe434b7db2b32ff791a8f1cdd0cfb1995a275e40712508471ae374b5646fcb5c5)
 
 ---
 
-*This project uses a dataset provided for an educational assessment. It does not represent real company data.* `[Adjust this line if appropriate.]`
